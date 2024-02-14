@@ -14,9 +14,9 @@ namespace SudokuApp.SudokuLogic
         public const int MinNumberValue = 0;
         public const int MaxNumberValue = 9;
 
-        public int X { get; private set; }
-        public int Y { get; private set; }
-        public GameBoard board { get; private set; }
+        public int Row { get; private set; }
+        public int Col { get; private set; }
+        public GameBoard Board { get; private set; }
         public List<TileSet> TileSets { get; private set; } = new List<TileSet>();
         [Range(MinNumberValue, MaxNumberValue)]
         public int CorrectNumber { get; private set; }
@@ -28,11 +28,19 @@ namespace SudokuApp.SudokuLogic
         public bool CanBeChanged { get; private set; } = true;
         public TileStatus TileStatus { get; private set; } = TileStatus.Unfilled;
 
-        public Tile(GameBoard board, int x, int y)
+        public Tile(GameBoard board, int row, int col, int? correctNumber = null)
         {
-            this.board = board;
-            X = x;
-            Y = y;
+            this.Board = board;
+            Row = row;
+            Col = col;
+            if(correctNumber != null)
+            {
+                CorrectNumber = correctNumber.Value;
+            }
+        }
+        public (int row, int col) GetPoint()
+        {
+            return (Row, Col);
         }
 
         public void SetCorrectNumber(int number)
