@@ -10,21 +10,22 @@ namespace SudokuApp.SudokuLogic
     public class Tile
     {
         public const int DefaultChosenNumber = 0;
-        public const int NotesNumberLength = 10;
-        public const int MinNumberValue = 0;
+        public const int NumberArrayLength = 10;
+        public const int MinPossibleNumberValue = 0;
+        public const int MinActualNumberValue = 1;
         public const int MaxNumberValue = 9;
 
         public int Row { get; private set; }
         public int Col { get; private set; }
         public GameBoard Board { get; private set; }
         public List<TileSet> TileSets { get; private set; } = new List<TileSet>();
-        [Range(MinNumberValue, MaxNumberValue)]
+        [Range(MinPossibleNumberValue, MaxNumberValue)]
         public int CorrectNumber { get; private set; }
-        [Range(MinNumberValue, MaxNumberValue)]
+        [Range(MinPossibleNumberValue, MaxNumberValue)]
         public int ChosenNumber { get; private set; } = DefaultChosenNumber;
 
-        //index corresponds to the number as such 0 isn't used
-        public bool[] NotesNumbers { get; private set; } = new bool[NotesNumberLength];
+        //index corresponds to the number, as such 0 isn't used
+        public bool[] NotesNumbers { get; private set; } = new bool[NumberArrayLength];
         public bool CanBeChanged { get; private set; } = true;
         public TileStatus TileStatus { get; private set; } = TileStatus.Unfilled;
 
@@ -53,13 +54,47 @@ namespace SudokuApp.SudokuLogic
             CanBeChanged = false;
             UpdateStatus();
         }
+        private void SetChosenNumber(int number)
+        {
+            ChosenNumber = number;
+            UpdateStatus();
+            ClearNotesNumbers();
+        }
+        private void SetNotesNumber(int number)
+        {
+            NotesNumbers[number] = !NotesNumbers[number];
+        }
+        private void ClearNotesNumbers()
+        {
+            for(int i = 0; i < NotesNumbers.Length; i++)
+            {
+                NotesNumbers[i] = false;
+            }
+        }
+        public void EraseChosenNumber()
+        {
+            if(!CanBeChanged) 
+                return;
+            SetChosenNumber(DefaultChosenNumber);
+        }
         public void FillChosenNumber(int number)
         {
-            if(CanBeChanged)
+            if(!CanBeChanged)
             {
-                ChosenNumber = number;
-                UpdateStatus();
-            }           
+                return;
+            }
+            if(number == ChosenNumber)
+            {
+                EraseChosenNumber();
+                return;
+            }
+            SetChosenNumber(number);
+        }
+        public void AddNote(int number)
+        {
+            if (TileStatus != TileStatus.Unfilled)
+                return;
+            SetNotesNumber(number);
         }
         public void AddTileSet(TileSet tileset)
         {
@@ -85,6 +120,28 @@ namespace SudokuApp.SudokuLogic
             }
             TileStatus = TileStatus.CorrectlyFilled;
             return;
+        }
+
+        public List<int> GetPossibleCorrectNumbers()
+        {
+            LinkedList<int> possibleNumbers = new LinkedList<int>();
+            for( int i = MinActualNumberValue; i <= MaxNumberValue; i++)
+                possibleNumbers.AddLast(i);
+
+            foreach( TileSet tileSet in TileSets)
+            {
+                var node = possibleNumbers.First;
+                while( node != null)
+                {
+                    var nextNode = node.Next;
+                    if(tileSet.ContainsCorrectNumber(node.Value))
+                    {
+                        possibleNumbers.Remove(node);
+                    }
+                    node = nextNode;
+                }
+            }
+            return possibleNumbers.ToList();
         }
     }
 

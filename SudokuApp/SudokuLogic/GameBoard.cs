@@ -16,6 +16,9 @@ namespace SudokuApp.SudokuLogic
         public Area Area { get; private set; }
         public Tile[,] Tiles { get; private set; }
         public List<TileSet> TileSets { get; private set; }
+        public List<TileSet> SquareTileSets { get; private set; }
+        public List<TileSet> HorizontalTileSets { get; private set; }
+        public List<TileSet> VerticalTileSets { get; private set; }
 
         public GameBoard() 
         {
@@ -34,24 +37,48 @@ namespace SudokuApp.SudokuLogic
                 }
             }
             TileSets = new List<TileSet>();
+            SquareTileSets = new List<TileSet>();
+            HorizontalTileSets = new List<TileSet>();
+            VerticalTileSets = new List<TileSet>();
+
+            TileSet tempSet = null;
 
             for (int r = Area.RowStart; r < Area.RowStart + Area.RowCount; r+=DefaultSquareSetLen)
             {
                 for (int c = Area.ColStart; c < Area.ColStart + Area.ColCount; c+=DefaultSquareSetLen)
                 {
-                    TileSets.Add(new TileSet(this, new Area(r, c, DefaultSquareSetLen, DefaultSquareSetLen)));
+                    tempSet = new TileSet(this, new Area(r, c, DefaultSquareSetLen, DefaultSquareSetLen));
+                    TileSets.Add(tempSet);
+                    SquareTileSets.Add(tempSet);
                 }
             }
 
             for (int i = Area.RowStart; i < Area.RowStart + Area.RowCount; i++)
             {
-                TileSets.Add(new TileSet(this, new Area( rowStart: i, Area.ColStart, rowCount: 1, colCount: DefaultLineSetLen)));
+                tempSet = new TileSet(this, new Area( rowStart: i, Area.ColStart, rowCount: 1, colCount: DefaultLineSetLen));
+                TileSets.Add(tempSet);
+                HorizontalTileSets.Add(tempSet);
             }
 
             for (int i = Area.ColStart; i < Area.ColStart + Area.ColCount; i++)
             {
-                TileSets.Add(new TileSet(this, new Area(rowStart: Area.RowStart, i, rowCount: DefaultLineSetLen, colCount: 1)));
+                tempSet = new TileSet(this, new Area(rowStart: Area.RowStart, i, rowCount: DefaultLineSetLen, colCount: 1));
+                TileSets.Add(tempSet);
+                VerticalTileSets.Add(tempSet);
             }
+        }
+        public Tile GetTile(int row, int col) 
+        {
+            return Tiles[row, col];
+        }
+        public Tile GetTile((int row, int col) coord)
+        {
+            return GetTile(coord.row, coord.col);
+        }
+
+        private void FillBoard()
+        {
+
         }
     }
 }

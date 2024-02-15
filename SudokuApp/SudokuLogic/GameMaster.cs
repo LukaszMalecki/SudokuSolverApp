@@ -9,4 +9,8 @@ namespace SudokuApp.SudokuLogic
     public class GameMaster
     {
     }
+    public enum ClickMode
+    {
+        Select, Notes, Erase
+    }
 }
