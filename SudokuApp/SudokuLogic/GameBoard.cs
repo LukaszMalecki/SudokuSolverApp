@@ -19,13 +19,16 @@ namespace SudokuApp.SudokuLogic
         public List<TileSet> SquareTileSets { get; private set; }
         public List<TileSet> HorizontalTileSets { get; private set; }
         public List<TileSet> VerticalTileSets { get; private set; }
+        private Random random;
+        public int? RandomSeed { get; private set; } = null;
 
-        public GameBoard() 
+        public GameBoard(int? seed = null) 
         {
+            ChangeSeed(seed);
             Initialize();
         }
         private void Initialize()
-        {
+        {        
             Area = new Area(0, 0, DefaultBoardRowCount, DefaultBoardColCount);
             Tiles = new Tile[Area.RowCount, Area.ColCount];
 
@@ -66,6 +69,7 @@ namespace SudokuApp.SudokuLogic
                 TileSets.Add(tempSet);
                 VerticalTileSets.Add(tempSet);
             }
+            FillBoard();
         }
         public Tile GetTile(int row, int col) 
         {
@@ -78,7 +82,77 @@ namespace SudokuApp.SudokuLogic
 
         private void FillBoard()
         {
+            /*foreach( var tile in Tiles ) 
+            {
+                tile.SetRandomCorrectNumber(random);
+            }*/
+            /*foreach(var square in SquareTileSets)
+            {
+                foreach(var tile in square.Tiles) 
+                {
+                    tile.SetRandomCorrectNumber(random);
+                }
+            }*/
+            for (int i = 0; i < SquareTileSets.Count; i += 4)
+            {
+                foreach (var tile in SquareTileSets[i].Tiles)
+                {
+                    tile.SetRandomCorrectNumber(random);
+                }
+            }
+            foreach (var square in SquareTileSets)
+            {
+                foreach (var tile in square.Tiles)
+                {
+                    tile.SetRandomCorrectNumber(random);
+                }
+            }
 
+        }
+        public void ChangeSeed(int? seed)
+        {
+            if(!seed.HasValue) 
+            {
+                random = new Random();
+                return;
+            }
+            RandomSeed = seed;
+            random = new Random(RandomSeed.Value);
+        }
+
+        public void TestPrintCorrectNumberBoard(bool printFailureNumber = true)
+        {
+            for (int r = Area.RowStart; r < Area.RowStart + Area.RowCount; r++)
+            {
+                for (int c = Area.ColStart; c < Area.ColStart + Area.ColCount; c++)
+                {
+                    if( c%3 == 0)
+                    {
+                        Console.Write(" ");
+                    }
+                    Console.Write(Tiles[r, c].CorrectNumber);
+                }
+                if( r%3 == 2)
+                {
+                    Console.Write("\n");
+                }
+                Console.Write("\n");
+            }
+            if(printFailureNumber)
+            {
+                Console.Write("Incorrectly initialized tiles: {0}", GetIncorrectlyInitializedTilesCount());
+            }
+        }
+        public int GetIncorrectlyInitializedTilesCount()
+        {
+            int retValue = 0;
+
+            foreach( var tile in Tiles)
+            {
+                if(!tile.IsTileCorrectlyInitialized())
+                    retValue++;
+            }
+            return retValue;
         }
     }
 }

@@ -28,17 +28,21 @@ namespace SudokuApp.SudokuLogic
         {
             return Area.IsSquare();
         }
-        public void UpdateCorrectNumbers()
+        public void UpdateCorrectNumbers(bool resetList = true)
         {
-            ResetCorrectNumbers();
-            RemainingChosenNumbers = MaxNumberCount;
-            CorrectNumbers[0] = true;
-            foreach( Tile tile in Tiles)
+            if (resetList)
             {
-                if(!CorrectNumbers[tile.CorrectNumber])
+                ResetCorrectNumbers();
+                RemainingChosenNumbers = MaxNumberCount;
+                CorrectNumbers[0] = true;
+                foreach (Tile tile in Tiles)
                 {
-                    RemainingChosenNumbers--;
-                    CorrectNumbers[tile.CorrectNumber] = true;
+                    //default correct number is 0
+                    if (!CorrectNumbers[tile.CorrectNumber])
+                    {
+                        RemainingChosenNumbers--;
+                        CorrectNumbers[tile.CorrectNumber] = true;
+                    }
                 }
             }
             if(RemainingChosenNumbers == 0)
@@ -51,6 +55,15 @@ namespace SudokuApp.SudokuLogic
             for( int i = 0; i < CorrectNumbers.Length; i++)
             {
                 CorrectNumbers[i] = false;
+            }
+        }
+        public void AddCorrectNumber(int number)
+        {
+            if (!CorrectNumbers[number])
+            {
+                RemainingCorrectNumbers--;
+                CorrectNumbers[number] = true;
+                UpdateCorrectNumbers(resetList:false);
             }
         }
         private void InitializeTilesList()

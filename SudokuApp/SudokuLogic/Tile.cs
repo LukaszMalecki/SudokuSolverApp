@@ -10,6 +10,7 @@ namespace SudokuApp.SudokuLogic
     public class Tile
     {
         public const int DefaultChosenNumber = 0;
+        public const int DefaultCorrectNumber = 0;
         public const int NumberArrayLength = 10;
         public const int MinPossibleNumberValue = 0;
         public const int MinActualNumberValue = 1;
@@ -20,7 +21,7 @@ namespace SudokuApp.SudokuLogic
         public GameBoard Board { get; private set; }
         public List<TileSet> TileSets { get; private set; } = new List<TileSet>();
         [Range(MinPossibleNumberValue, MaxNumberValue)]
-        public int CorrectNumber { get; private set; }
+        public int CorrectNumber { get; private set; } = DefaultCorrectNumber;
         [Range(MinPossibleNumberValue, MaxNumberValue)]
         public int ChosenNumber { get; private set; } = DefaultChosenNumber;
 
@@ -36,7 +37,7 @@ namespace SudokuApp.SudokuLogic
             Col = col;
             if(correctNumber != null)
             {
-                CorrectNumber = correctNumber.Value;
+                SetCorrectNumber(correctNumber.Value);
             }
         }
         public (int row, int col) GetPoint()
@@ -44,9 +45,16 @@ namespace SudokuApp.SudokuLogic
             return (Row, Col);
         }
 
-        public void SetCorrectNumber(int number)
+        public void SetCorrectNumber(int number, bool updateTileSet = true)
         {
-            CorrectNumber = number;           
+            CorrectNumber = number;
+            if(updateTileSet)
+            {
+                foreach (TileSet tileSet in TileSets)
+                {
+                    tileSet.AddCorrectNumber(number);
+                }
+            }
         }
         public void RevealCorrectNumber()
         {
@@ -130,6 +138,8 @@ namespace SudokuApp.SudokuLogic
 
             foreach( TileSet tileSet in TileSets)
             {
+                if (tileSet.RemainingCorrectNumbers == TileSet.MaxNumberCount)
+                    continue;
                 var node = possibleNumbers.First;
                 while( node != null)
                 {
@@ -142,6 +152,22 @@ namespace SudokuApp.SudokuLogic
                 }
             }
             return possibleNumbers.ToList();
+        }
+
+        public bool SetRandomCorrectNumber(Random random)
+        {
+            if (CorrectNumber != 0)
+                return true;
+            var possibleNumbers = GetPossibleCorrectNumbers();
+            if(possibleNumbers.Count == 0)
+                return false;
+            int numIndex = random.Next(possibleNumbers.Count);
+            SetCorrectNumber(possibleNumbers[numIndex]);
+            return true;
+        }
+        public bool IsTileCorrectlyInitialized()
+        {
+            return CorrectNumber != DefaultCorrectNumber;
         }
     }
 
